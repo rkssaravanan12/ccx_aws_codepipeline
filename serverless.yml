@@ -59,6 +59,11 @@ provider:
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
+custom:
+  apigwBinary:
+    types:
+      - '*/*'
+
 functions:
   hello:
     handler: handler.hello

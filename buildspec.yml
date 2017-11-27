@@ -1,0 +1,31 @@
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+     # key: "value"
+  #parameter-store:
+     # key: "value"
+     # key: "value"
+
+phases:
+  install:
+    commands:
+      npm install && npm install serverless -g
+  #pre_build:
+    #commands:
+      # - command
+      # - command
+  build:
+    commands:
+      # - command
+      # - command
+  post_build:
+    commands:
+      sls deploy --stage dev
+#artifacts:
+  #files:
+    # - location
+    # - location
+  #discard-paths: yes
+  #base-directory: location
