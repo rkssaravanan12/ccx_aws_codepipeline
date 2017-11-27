@@ -13,6 +13,9 @@
 
 service: ccx-aws-codepipeline
 
+plugins:
+  - serverless-apigw-binary
+
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
@@ -20,6 +23,8 @@ service: ccx-aws-codepipeline
 provider:
   name: aws
   runtime: nodejs6.10
+  stage: prod
+  region: us-west-2
 
 # you can overwrite defaults here
 #  stage: dev

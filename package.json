@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/rkssaravanan12/ccx_aws_codepipeline/issues"
   },
-  "homepage": "https://github.com/rkssaravanan12/ccx_aws_codepipeline#readme"
+  "homepage": "https://github.com/rkssaravanan12/ccx_aws_codepipeline#readme",
+  "devDependencies": {
+    "serverless-apigw-binary": "^0.4.4"
+  }
 }
