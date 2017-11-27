@@ -22,7 +22,7 @@ phases:
       # - command
   post_build:
     commands:
-      serverless deploy --stage dev
+      sls deploy --stage dev
 #artifacts:
   #files:
     # - location
