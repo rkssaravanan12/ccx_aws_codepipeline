@@ -1,9 +1,9 @@
 version: 0.2
 
-#env:
-  #variables:
-     # key: "value"
-     # key: "value"
+env:
+  variables:
+     stage: "dev"
+     config: "http://config.com"
   #parameter-store:
      # key: "value"
      # key: "value"
@@ -22,7 +22,7 @@ phases:
       # - command
   post_build:
     commands:
-      sls deploy --stage dev
+      sls deploy --stage ${stage}
 #artifacts:
   #files:
     # - location
