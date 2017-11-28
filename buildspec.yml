@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-     stage: "dev"
+     stage: "prod"
      config: "http://config.com"
   #parameter-store:
      # key: "value"
