@@ -1,13 +1,16 @@
 {
-	"Parameters": {
-		"stage": "dev"
-	},
-	"Tags": {
-		"custom_tag": "devbuild"
-	},
-	"StackPolicy": {
-		"Statement": [
-			"StackPolicyStatement"
-		]
-	}
+  "Parameters" : {
+    "env" : "dev",
+    "apiStage" : "tagDev"
+  },
+  "StackPolicy" : {
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "NotAction" : "Update:Delete",
+        "Principal": "*",
+        "Resource" : "*"
+      }
+    ]
+  }
 }
