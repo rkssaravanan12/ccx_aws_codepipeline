@@ -23,9 +23,8 @@ phases:
   #post_build:
     #commands:
     #  sls deploy --stage dev
-#artifacts:
-  #files:
-    # - location
-    # - location
-  #discard-paths: yes
-  #base-directory: location
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes
+  base-directory: location
