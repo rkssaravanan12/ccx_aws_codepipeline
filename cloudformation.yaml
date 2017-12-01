@@ -2,12 +2,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Serverless Express Application/API powered by API Gateway and Lambda
+Parameters: 
+    StageName:
+	  Type: String
+      Default: prod
+	Region:
+      Type: String
+      Default: !Ref Region	
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
       DefinitionUri: ./simple-proxy-api.yaml
-      StageName: prod
+      StageName: !Ref validatorName
       Variables:
         ServerlessExpressLambdaFunctionName: !Ref AwsServerlessExpressFunction
 
@@ -43,7 +50,7 @@ Resources:
       SourceArn: !Join
         - ''
         - - 'arn:aws:execute-api:'
-          - !Ref AWS::Region
+          - !Ref Region
           - ":"
           - !Ref AWS::AccountId
           - ":"
@@ -79,9 +86,9 @@ Outputs:
     Value: !Join
       - ''
       - - https://
-        - !Ref AWS::Region
+        - !Ref Region
         - ".console.aws.amazon.com/lambda/home?region="
-        - !Ref AWS::Region
+        - !Ref Region
         - "#/functions/"
         - !Ref AwsServerlessExpressFunction
 
@@ -90,9 +97,9 @@ Outputs:
     Value: !Join
       - ''
       - - https://
-        - !Ref AWS::Region
+        - !Ref Region
         - ".console.aws.amazon.com/apigateway/home?region="
-        - !Ref AWS::Region
+        - !Ref Region
         - "#/apis/"
         - !Ref ApiGatewayApi
         - "/stages/prod"
@@ -105,5 +112,5 @@ Outputs:
       - - https://
         - !Ref ApiGatewayApi
         - ".execute-api."
-        - !Ref AWS::Region
+        - !Ref Region
         - ".amazonaws.com/prod/"
