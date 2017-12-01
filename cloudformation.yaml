@@ -14,7 +14,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       DefinitionUri: ./simple-proxy-api.yaml
-      StageName: !Ref validatorName
+      StageName: !Ref StageName
       Variables:
         ServerlessExpressLambdaFunctionName: !Ref AwsServerlessExpressFunction
 
