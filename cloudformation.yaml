@@ -2,13 +2,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Serverless Express Application/API powered by API Gateway and Lambda
-Parameters: 
-    StageName:
-	  Type: String
-      Default: prod
-	Region:
-      Type: String
-      Default: !Ref Region	
+Parameters:
+  StageName:
+    Type: String
+    Default: prod
+  Region:
+    Type: String
+    Default: us-west-2    
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
