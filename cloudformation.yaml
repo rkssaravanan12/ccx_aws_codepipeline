@@ -69,7 +69,7 @@ Resources:
       MemorySize: 1024
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs6.10
-      Timeout: 30
+      Timeout: 30  
       Events:
         ProxyApiRoot:
           Type: Api
@@ -83,10 +83,11 @@ Resources:
             RestApiId: !Ref ApiGatewayApi
             Path: /{proxy+}
             Method: ANY
-        Environment:
-          Variables: Api
+      Environment:
+        Variables:
           configUrl: !Ref ConfigUrl
           environment: !Ref StageName
+
 Outputs:
   LambdaFunctionConsoleUrl:
     Description: Console URL for the Lambda Function.
