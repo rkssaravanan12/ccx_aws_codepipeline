@@ -110,7 +110,7 @@ Outputs:
         - !Ref Region
         - "#/apis/"
         - !Ref ApiGatewayApi
-        - "/stages/prod"
+        - "/prod"
 
   ApiUrl:
     Description: Invoke URL for your API. Clicking this link will perform a GET request
