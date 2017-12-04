@@ -11,7 +11,8 @@ Parameters:
     Default: us-west-2
   ConfigUrl:
     Default: https://gjnudpwpa7.execute-api.us-west-2.amazonaws.com/development/
-    Type: String	
+    Type: String
+
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
