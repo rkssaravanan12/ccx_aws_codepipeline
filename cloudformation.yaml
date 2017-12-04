@@ -1,169 +1,122 @@
-AWSTemplateFormatVersion: 2010-09-09
-Outputs:
-  ApiGatewayApiConsoleUrl:
-    Description: Console URL for the API Gateway API's Stage.
-    Value: !Join 
-      - ''
-      - - 'https://'
-        - !Ref Region
-        - .console.aws.amazon.com/apigateway/home?region=
-        - !Ref Region
-        - '#/apis/'
-        - !Ref ApiGatewayApi
-        - /stages/prod
-  ApiUrl:
-    Description: >-
-      Invoke URL for your API. Clicking this link will perform a GET request on
-      the root resource of your API.
-    Value: !Join 
-      - ''
-      - - 'https://'
-        - !Ref ApiGatewayApi
-        - .execute-api.
-        - !Ref Region
-        - .amazonaws.com/prod/
-  LambdaFunctionConsoleUrl:
-    Description: Console URL for the Lambda Function.
-    Value: !Join 
-      - ''
-      - - 'https://'
-        - !Ref Region
-        - .console.aws.amazon.com/lambda/home?region=
-        - !Ref Region
-        - '#/functions/'
-        - !Ref AwsServerlessExpressFunction
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Express Application/API powered by API Gateway and Lambda
 Parameters:
-  Region:
-    Default: us-west-2
-    Type: String
   StageName:
-    Default: prod
     Type: String
+    Default: prod
+  Region:
+    Type: String
+    Default: us-west-2
   ConfigUrl:
     Default: https://gjnudpwpa7.execute-api.us-west-2.amazonaws.com/development/
-    Type: String
-Description: Serverless Express Application/API powered by API Gateway and Lambda
+    Type: String	
 Resources:
-  AwsServerlessExpressFunctionProxyApiRootPermissionTest:
-    Type: 'AWS::Lambda::Permission'
-    Properties:
-      Action: 'lambda:invokeFunction'
-      Principal: apigateway.amazonaws.com
-      FunctionName: !Ref AwsServerlessExpressFunction
-      SourceArn: !Sub 
-        - >-
-          arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/ANY/
-        - __Stage__: '*'
-          __ApiId__: !Ref ApiGatewayApi
   ApiGatewayApi:
-    Type: 'AWS::ApiGateway::RestApi'
+    Type: AWS::Serverless::Api
     Properties:
-      BodyS3Location:
-        Bucket: awsnodejs
-        Key: 4fc11fea147059dae5228ef02bb5a172
-  LambdaApiGatewayExecutionPermission:
-    Type: 'AWS::Lambda::Permission'
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      Principal: apigateway.amazonaws.com
-      FunctionName: !GetAtt 
-        - AwsServerlessExpressFunction
-        - Arn
-      SourceArn: !Join 
-        - ''
-        - - 'arn:aws:execute-api:'
-          - !Ref Region
-          - ':'
-          - !Ref 'AWS::AccountId'
-          - ':'
-          - !Ref ApiGatewayApi
-          - /*/*
+      DefinitionUri: ./simple-proxy-api.yaml
+      StageName: !Ref StageName
+      Variables:
+        ServerlessExpressLambdaFunctionName: !Ref AwsServerlessExpressFunction
+
   LambdaExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
-      Path: /
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource: 'arn:aws:logs:*:*:*'
-                Effect: Allow
       AssumeRolePolicyDocument:
-        Version: 2012-10-17
+        Version: '2012-10-17'
         Statement:
-          Action: 'sts:AssumeRole'
           Effect: Allow
           Principal:
             Service: lambda.amazonaws.com
-  AwsServerlessExpressFunction:
-    Type: 'AWS::Lambda::Function'
+          Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+
+  LambdaApiGatewayExecutionPermission:
+    Type: AWS::Lambda::Permission
     Properties:
-      Code:
-        S3Bucket: awsnodejs
-        S3Key: 48c78646ad889e2579932872518882cd
-      Tags:
-        - Value: SAM
-          Key: 'lambda:createdBy'
-      MemorySize: 1024
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt AwsServerlessExpressFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Join
+        - ''
+        - - 'arn:aws:execute-api:'
+          - !Ref Region
+          - ":"
+          - !Ref AWS::AccountId
+          - ":"
+          - !Ref ApiGatewayApi
+          - "/*/*"
+
+  AwsServerlessExpressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
       Handler: lambda.handler
-      Role: !GetAtt 
-        - LambdaExecutionRole
-        - Arn
-      Timeout: 30
+      MemorySize: 1024
+      Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs6.10
-      Environment:
-        Variables:
+      Timeout: 30
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /{proxy+}
+            Method: ANY
+        Environment:
+          Variables: Api
           configUrl: !Ref ConfigUrl
           environment: !Ref StageName
-  ApiGatewayApiDeployment50faf8ef41:
-    Type: 'AWS::ApiGateway::Deployment'
-    Properties:
-      RestApiId: !Ref ApiGatewayApi
-      Description: 'RestApi deployment id: 50faf8ef414255b304654d8d92708f8eec06623b'
-      StageName: Stage
-  AwsServerlessExpressFunctionProxyApiGreedyPermissionTest:
-    Type: 'AWS::Lambda::Permission'
-    Properties:
-      Action: 'lambda:invokeFunction'
-      Principal: apigateway.amazonaws.com
-      FunctionName: !Ref AwsServerlessExpressFunction
-      SourceArn: !Sub 
-        - >-
-          arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/ANY/*
-        - __Stage__: '*'
-          __ApiId__: !Ref ApiGatewayApi
-  AwsServerlessExpressFunctionProxyApiRootPermissionStage:
-    Type: 'AWS::Lambda::Permission'
-    Properties:
-      Action: 'lambda:invokeFunction'
-      Principal: apigateway.amazonaws.com
-      FunctionName: !Ref AwsServerlessExpressFunction
-      SourceArn: !Sub 
-        - >-
-          arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/ANY/
-        - __Stage__: !Ref StageName
-          __ApiId__: !Ref ApiGatewayApi
-  AwsServerlessExpressFunctionProxyApiGreedyPermissionStage:
-    Type: 'AWS::Lambda::Permission'
-    Properties:
-      Action: 'lambda:invokeFunction'
-      Principal: apigateway.amazonaws.com
-      FunctionName: !Ref AwsServerlessExpressFunction
-      SourceArn: !Sub 
-        - >-
-          arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/ANY/*
-        - __Stage__: !Ref StageName
-          __ApiId__: !Ref ApiGatewayApi
-  ApiGatewayApiStage:
-    Type: 'AWS::ApiGateway::Stage'
-    Properties:
-      Variables:
-        ServerlessExpressLambdaFunctionName: !Ref AwsServerlessExpressFunction
-      RestApiId: !Ref ApiGatewayApi
-      DeploymentId: !Ref ApiGatewayApiDeployment50faf8ef41
-      StageName: !Ref StageName
+Outputs:
+  LambdaFunctionConsoleUrl:
+    Description: Console URL for the Lambda Function.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref Region
+        - ".console.aws.amazon.com/lambda/home?region="
+        - !Ref Region
+        - "#/functions/"
+        - !Ref AwsServerlessExpressFunction
+
+  ApiGatewayApiConsoleUrl:
+    Description: Console URL for the API Gateway API's Stage.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref Region
+        - ".console.aws.amazon.com/apigateway/home?region="
+        - !Ref Region
+        - "#/apis/"
+        - !Ref ApiGatewayApi
+        - "/stages/prod"
+
+  ApiUrl:
+    Description: Invoke URL for your API. Clicking this link will perform a GET request
+      on the root resource of your API.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref ApiGatewayApi
+        - ".execute-api."
+        - !Ref Region
+        - ".amazonaws.com/prod/"
